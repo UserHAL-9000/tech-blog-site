@@ -12,12 +12,43 @@ router.get('/', async (req, res) => {
             ],
         });
 
-      const projects = projectData.map((project) => project.get({ plain: true }));
+        const projects = projectData.map((project) => project.get({ plain: true }));
 
-      res.render('homepage', { projects, logged_in: req.session.logged_in });
+        res.render('homepage', { projects, logged_in: req.session.logged_in });
     } catch (error) {
-      res.status(500).json(error);
+        res.status(500).json(error);
     }
+});
+
+router.get('/project/:id', async (req, res) => {
+    try {
+        const projectData = await Project.findByPk(req.params.id, {
+            include: [
+                {
+                    model: User,
+                    attributes: ['name'],
+                },
+            ],
+        });
+
+        const project = projectData.get({ plain: true });
+
+        res.render('project', {
+            ...Project,
+            logged_in: req.session.logged_in,
+        });
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+router.get('/login', (req, res) => {
+    if(req.session.logged_in){
+        res.redirect('/profile');
+        return;
+    }
+
+    res.render('login');
 });
 
 module.exports = router;
